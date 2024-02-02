@@ -31,7 +31,7 @@ class App extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SplashScreen();
           }
-          
+
           if (snapshot.hasData) {
             return const ChatScreen();
           }
