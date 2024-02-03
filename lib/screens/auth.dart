@@ -45,6 +45,7 @@ class _AuthScreenState extends State<AuthScreen> {
       });
 
       if (_isLogin) {
+        // ignore: unused_local_variable
         final userCredentials = await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
       } else {
