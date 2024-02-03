@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/widgets/user_image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +24,7 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredPassword = '';
   File? _selectedImage;
   var _isAuthenticating = false;
+  var _enteredUsename = '';
 
   void _submit() async {
     final isValid = _form.currentState!.validate();
@@ -56,7 +58,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
         await storageRef.putFile(_selectedImage!);
         final imageUrl = await storageRef.getDownloadURL();
-        print(imageUrl);
+
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredentials.user!.uid)
+            .set(
+          {
+            'username': _enteredUsename,
+            'email': _enteredEmail,
+            'image_url': imageUrl,
+          },
+        );
       }
     } on FirebaseAuthException catch (error) {
       if (error.code == 'email-already-in-use') {
@@ -109,8 +121,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               }),
                             TextFormField(
                               decoration: const InputDecoration(
-                                labelText: "Email Address",
-                              ),
+                                  labelText: "Email Address"),
                               keyboardType: TextInputType.emailAddress,
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
@@ -126,10 +137,26 @@ class _AuthScreenState extends State<AuthScreen> {
                                 _enteredEmail = value!;
                               },
                             ),
-                            TextFormField(
-                              decoration: const InputDecoration(
-                                labelText: "Password",
+                            if (!_isLogin)
+                              TextFormField(
+                                decoration: const InputDecoration(
+                                    labelText: 'Username'),
+                                enableSuggestions: false,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.isEmpty ||
+                                      value.trim().length < 4) {
+                                    return 'Please enter a valid username (atleast 4 characters)';
+                                  }
+                                  return null;
+                                },
+                                onSaved: (value) {
+                                  _enteredUsename = value!;
+                                },
                               ),
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: "Password"),
                               obscureText: true,
                               validator: (value) {
                                 if (value == null || value.trim().length < 6) {
