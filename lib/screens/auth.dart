@@ -76,7 +76,9 @@ class _AuthScreenState extends State<AuthScreen> {
         // ...
       }
       if (context.mounted) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).clearSnackBars();
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(error.message ?? 'Authentication Failed.')));
       }
